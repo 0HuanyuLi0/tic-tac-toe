@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Mouse+Memoirs&display=swap');
+
+* {
+    box-sizing: border-box;
+    background-color: black;
+    color: white;
+    font-family: 'Mouse Memoirs', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    position: relative;
+    top: 50px;
+    text-align: center;
+    margin-bottom: 60px;
+    font-size: clamp(50px, 10vw, 80px)
+}
+
+header,
+.btns {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    max-width: 800px;
+    margin: 0 auto 20px;
+    /* justify-content: center;
+    align-items: center; */
+}
+
+.score {
+    width: 20%;
+    text-align: center;
+    font-size: clamp(15px, 8vw, 50px)
+}
+
+#reset-btn,
+#start-btn {
+    width: clamp(80px, 25vw, 140px);
+    aspect-ratio: 21/9;
+    font-size: 1.5rem;
+
+}
+
+
+#game-container {
+    width: 80vw;
+    aspect-ratio: 1/1;
+    max-width: 500px;
+    margin: 20px auto;
+    position: relative;
+    /* border: 1px solid red; */
+}
+
+.row {
+    /* border: 1px solid red; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cell {
+    width: 100%;
+    /* not sure here */
+    aspect-ratio: 1/1;
+    border: 1px solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(30px, 20vw, 120px);
+}
+
+footer {
+    text-align: center;
+    font-size: clamp(20px, 12vw, 30px);
+}
