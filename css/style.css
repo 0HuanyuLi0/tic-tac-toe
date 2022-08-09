@@ -17,16 +17,18 @@ h1 {
     font-size: clamp(50px, 10vw, 80px)
 }
 
-header,
-.btns {
+header, .btns{
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
     max-width: 800px;
     margin: 0 auto 20px;
-    /* justify-content: center;
-    align-items: center; */
+    /* justify-content: center; */
+    align-items: center;
+    /* position: relative; */
+    /* border: 1px solid red; */
 }
+
 
 .score {
     width: 20%;
@@ -34,13 +36,22 @@ header,
     font-size: clamp(15px, 8vw, 50px)
 }
 
-#reset-btn,
-#start-btn {
+
+#reset-btn{
     width: clamp(80px, 25vw, 140px);
     aspect-ratio: 21/9;
-    font-size: 1.5rem;
-
+    font-size: clamp(15px, 8vw, 50px);
 }
+
+.btns label{
+    font-size: clamp(15px, 8vw, 40px);
+}
+
+.btns input{
+    width: 5vw;
+    font-size: clamp(15px, 8vw, 40px);
+}
+
 
 
 #game-container {
@@ -68,6 +79,7 @@ header,
     justify-content: center;
     align-items: center;
     font-size: clamp(30px, 20vw, 120px);
+    /* font-size: 100%; */
 }
 
 footer {

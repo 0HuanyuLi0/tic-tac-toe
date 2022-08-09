@@ -1,5 +1,5 @@
 
-
+// https://gist.github.com/textchimp/afcb3ddc676dccd59ccb18cb9391c87a
 const scors = {
     x: 1,
     o: 2,
@@ -8,12 +8,20 @@ const scors = {
 
 let isPlayerX = true;
 let isGameOver = false;
+let dimension = null;
 
 const tools = {
 
     init: function () {
-        $('.cell').text(' ')
+        // console.log(this);
+        dimension = $('#dimension').val();
+        $('#game-container').html('');
+        tools.genTable();
+
         $('.player-score').text('0')
+
+
+        // console.log(dimension);
         for (const key in scors) {
             scors[key] = 0;
         }
@@ -21,16 +29,63 @@ const tools = {
         $('#reset-btn').text('Reset')
     }, //init
 
-    winArray: [
-        '012',
-        '345',
-        '678',
-        '036',
-        '147',
-        '258',
-        '048',
-        '246',
-    ], // winArray
+    genTable: function () {
+        const $gameContainer = $('#game-container');
+
+        for (let j = 0; j < dimension; j++) {
+            const $rowDiv = $('<div>').addClass('row').appendTo($gameContainer);
+
+            for (let i = 0; i < dimension; i++) {
+                $('<div>').addClass('cell').attr('id',`cell-${i+j*dimension}`).text(' ').appendTo($rowDiv);
+            } // genRow
+        }
+
+        $('.cell').on('click', handler)
+    }, // genTable
+
+    genAnswer: function () {
+        const len = dimension * dimension;
+        const answerArray = [];
+        let tempArray = [];
+        const all = [];
+        for (let i = 0; i < len; i++) {
+            all.push(i)
+        }// all : 0-8
+        // console.log(all);
+
+        for (let i = 0; i < dimension; i++) {
+            tempArray = [];
+            for (let j = 0; j < dimension; j++) {
+                tempArray.push(all[j + i * dimension])
+            }
+            answerArray.push(tempArray)
+        } // row answers
+
+        for (let i = 0; i < dimension; i++) {
+            tempArray = [];
+            for (let j = 0; j < dimension; j++) {
+                tempArray.push(all[i + j * dimension])
+            }
+            answerArray.push(tempArray)
+        } // for colum answers
+
+        tempArray = [];
+        for (let i = 0; i < dimension; i++) {
+            tempArray.push(all[(i * dimension) + i])
+        }
+        answerArray.push(tempArray)
+        // for postive diagonal
+
+        tempArray = [];
+        for (let i = 0; i < dimension; i++) {
+            tempArray.push(all[(dimension - 1) * (i + 1)])
+        }
+        answerArray.push(tempArray)
+        // for negtive diagonal
+
+        return answerArray;
+
+    }, // genAnswer
 
     putSymbol: function (position) {
         if (isGameOver) {
@@ -40,34 +95,38 @@ const tools = {
         if (target.text() !== ' ') {
             return
         } else if (isPlayerX) {
-            target.text('X')
+            target.text('X').css({
+                fontSize: `${120/dimension*3}px`,
+                color:'red'
+            })
             isPlayerX = !isPlayerX
         } else {
-            target.text('O')
+            target.text('O').css({
+                fontSize: `${120/dimension*3}px`,
+                color:'green'
+            })
             isPlayerX = !isPlayerX
         }
         // console.log(position);
         this.checkResult(position.slice(-1));
     }, //putSymbol
 
-    checkResult: function (position) {
+    checkResult: function () {
         const cells = $('.cell').text()
 
-        let x = '';
-        let o = '';
+        let x = [];
+        let o = [];
 
         for (let i = 0; i < cells.length; i++) {
             if (cells[i] === 'X') {
-                x += i
+                x.push(i)
             } else if (cells[i] === 'O') {
-                o += i
+                o.push(i)
             }
         }
 
-
-
-        for (let i = 0; i < this.winArray.length; i++) {
-            const currentAnswer = this.winArray[i];
+        for (let i = 0; i < this.genAnswer().length; i++) {
+            const currentAnswer = this.genAnswer()[i];
             if (this.isInAnswer(currentAnswer, x)) {
                 this.getWin('x')
                 return
@@ -77,28 +136,40 @@ const tools = {
             }
         }
 
-        if (x.length === 5) {
+        if ((x.length+o.length) === dimension*dimension) {
             this.getTie()
         }
 
     }, //checkResult
 
-    getWin: function (winner) {
+    isInAnswer: function (answerArray, array) {
+        let output = true;
 
+        for (let i = 0; i < answerArray.length; i++) {
+            if (array.indexOf(answerArray[i]) === -1) {
+                output = false;
+                break;
+            }
+        }
+        return output
+    }, // isInAnswer
+
+    getWin: function (winner) {
+      
         scors[winner] += 1
         $(`#player-${winner}`).text(scors[winner])
         isPlayerX = true;
         isGameOver = true;
+       
 
-        $('<div>').text(`Player ${winner} Win!`).css({
+        $('<div>').text(`Player ${winner.toUpperCase()} Win!`).css({
             fontSize: 'clamp(30px,20vw,120px)',
-            color: 'red',
+            color: `${winner==='x'?'red':'green'}`,
             position: 'absolute',
             top: '20%',
             left: '0',
             right: '0',
             margin: 'auto',
-
             textAlign: 'center',
         }).appendTo($('#game-container')).fadeOut(3000)
 
@@ -110,18 +181,6 @@ const tools = {
 
     }, // getWin
 
-    isInAnswer: function (answerString, str) {
-        //answerString-short
-        let output = true;
-
-        for (let i = 0; i < answerString.length; i++) {
-            if (str.indexOf(answerString[i]) === -1) {
-                output = false;
-                break;
-            }
-        }
-        return output
-    }, // isInAnswer
 
     getTie: function () {
         isGameOver = true;
@@ -131,7 +190,7 @@ const tools = {
 
         $('<div>').text(`Tie!`).css({
             fontSize: 'clamp(30px,20vw,120px)',
-            color: 'red',
+            color: 'yellow',
             position: 'absolute',
             top: '20%',
             left: '0',
@@ -152,12 +211,12 @@ const tools = {
 
 const handler = function () {
 
-
+    console.log(this.id);
     tools.putSymbol(this.id);
 
 } // handler
 
 
-$('.cell').on('click', handler)
 $('#reset-btn').on('click', tools.init)
+// $('.cell').on('click', handler)
 
