@@ -50,6 +50,7 @@ header, .btns{
 .btns input{
     width: 5vw;
     font-size: clamp(15px, 8vw, 40px);
+    text-align: center;
 }
 
 
