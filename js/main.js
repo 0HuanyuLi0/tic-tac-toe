@@ -250,25 +250,12 @@ const tools = {
         const randomChoice = this.randomChoice(unoccupied);
 
         if (unoccupied.includes(centerPosition)) {
-            return `cell-${centerPosition}`
+            // return `cell-${centerPosition}`
         } // take the center cell to maximum win chance
 
-
-        //====================== defencse ===============================
-        let defenseStep = this.predictNextStep('x')
-        defenseStep = this.arrRemover(defenseStep, records.o)
-        defenseStep = this.arrDelArr(defenseStep, records.x)
-        defenseStep = this.shortestPath(defenseStep)
-        if (defenseStep.flat(Infinity).length === 1) {
-            return `cell-${defenseStep}`
-        }
-        
         //=========================== attack ================================
-        // console.log(records.o);
-        if (records.o.length === 0) {
-            return `cell-${defenseStep}`
-        }
         let attackStep = this.predictNextStep('o')
+        // console.log(attackStep);
         attackStep = this.arrRemover(attackStep, records.x)
         attackStep = this.arrDelArr(attackStep, records.o)
         attackStep = this.shortestPath(attackStep)
@@ -276,16 +263,34 @@ const tools = {
             return `cell-${attackStep}`
         }
 
-        let sumArr = defenseStep.concat(attackStep)
+        //====================== defencse ===============================
+        let defenseStep = this.predictNextStep('x')
+        console.log('posbs: ',defenseStep);
+        defenseStep = this.arrRemover(defenseStep, records.o)
+        console.log('arrRemover: ',defenseStep,records.o);
+        defenseStep = this.arrDelArr(defenseStep, records.x)
+        console.log('arrDeler: ',defenseStep,records.x);
+        defenseStep = this.shortestPath(defenseStep)
+        console.log('Short: ',defenseStep);
+        if (defenseStep.flat(Infinity).length === 1) {
+            return `cell-${defenseStep}`
+        }
+        // console.log(defenseStep);
+
+        let sumArr = defenseStep.flat(Infinity).concat(attackStep.flat(Infinity))
+        console.log('SUM: ',sumArr);
         optItem = this.highestFreqItem(sumArr.flat(Infinity))
-        if (optItem === null) {
+        console.log('OP: ', optItem);
+        if (optItem === null || optItem.length===0) {
             this.showMessage('tie')
             // return `cell-${randomChoice}`
+        } else if (optItem.length > 1) {
+            optItem = this.randomChoice(optItem)
         }
-        
-        console.log('A: ',attackStep);
+
+        console.log('A: ', attackStep);
         console.log('D: ', defenseStep);
-        console.log('OP: ', optItem);
+        console.log('OPF: ', optItem);
         return `cell-${optItem}`
 
 
@@ -295,7 +300,7 @@ const tools = {
         // find the item that has the highest frequecy in arr Array
         const items = {};
         let counter = 0;
-        let output = null;
+        let output = [];
         for (let i = 0; i < arr.length; i++) {
             if (items[arr[i]] === undefined) {
                 items[arr[i]] = 1;
@@ -304,11 +309,17 @@ const tools = {
             }
 
             if (items[arr[i]] > counter) {
-                output = arr[i]
                 counter = items[arr[i]]
             }
         }
 
+        for (const key in items) {
+            if (items[key] === counter) {
+                output.push(key)
+            }
+        }
+
+        console.log(output);
         return output
     }, //highestFreqItem
 
@@ -369,6 +380,9 @@ const tools = {
 
     arrFilter: function (arrX, arrY) {
         // return an array which contains the element that in arrY
+        if (arrY.length === 0) {
+            return arrX
+        }
         let temp = [];
         for (let i = 0; i < arrX.length; i++) {
             for (let j = 0; j < arrY.length; j++) {
@@ -415,7 +429,7 @@ const tools = {
         return sup
     }, // subArr
 
-    randomChoice:function (arr) {
+    randomChoice: function (arr) {
         return arr[Math.floor(Math.random() * arr.length)]
     }, //randomChoice
 
