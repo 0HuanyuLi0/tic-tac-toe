@@ -236,22 +236,136 @@ const tools = {
 
     opponent: function () {
         const tableLength = $dimension * $dimension;
+        const centerPosition = Math.floor( tableLength / 2);
         const all = [];
         for (let i = 0; i < tableLength; i++) {
             all.push(i)
         }// all : 0-8
         const occupied = records.x.concat(records.o);
         const unoccupied = all.filter(ele=>!occupied.includes(ele))
-        randomChoice = unoccupied[ Math.floor(Math.random()*unoccupied.length)]
-   
-        return `cell-${randomChoice}`
+        const randomChoice = unoccupied[ Math.floor(Math.random()*unoccupied.length)]
+
+        if (unoccupied.includes(centerPosition)) {
+            return `cell-${centerPosition}`
+        } // take the center cell to maximum win chance
+
+
+        
+        //======== against player X to win ============
+        // const answers = this.genAnswer();
+        // let predictiveX = [];
+        // for (let i = 0; i < answers.length; i++) {
+        //     const currentAnswer = answers[i]
+        //     for (let j = 0; j < records.x.length; j++) {
+        //         if (currentAnswer.includes( records.x[j] )) {
+        //             predictiveX.push(currentAnswer.filter(ele=>!occupied.includes(ele)))
+        //         }
+        //     }
+        // } // get the X next posible step
+        const nextStepforX = this.predictNextStep('x',occupied)
+        const shortPathforX = this.shortestPath(nextStepforX)
+        const choiceforX = this.highestFreqItem(shortPathforX.flat())
+
+        const nextStepforO = this.predictNextStep('o',occupied)
+        const shortPathforO = this.shortestPath(nextStepforO)
+        const choiceforO = this.highestFreqItem(shortPathforO.flat())
+
+        console.log('====x======');
+        console.log(nextStepforX);
+        console.log(shortPathforX);
+        console.log(choiceforX);
+        console.log('====o======');
+        console.log(nextStepforO);
+        console.log(shortPathforO);
+        console.log(choiceforO);
+        //======== against player X to win ============
+
+        //======== push player O to win ============
+        choice = randomChoice
+       
+        if(shortPathforX[0].length === 1 || shortPathforO[0] === undefined){
+            choice = choiceforX
+        } else if (shortPathforO[0].length === 1) {
+            choice = choiceforO
+        } 
+        return `cell-${choice}`
     }, // opponent
 
-    
+    highestFreqItem:function (arr) {
+        // find the item that has the highest frequecy in arr Array
+        const items={};
+        let counter=0;
+        let output=null;
+        for (let i = 0; i < arr.length; i++) {
+            if (items[arr[i]] === undefined) {
+                items[arr[i]] = 1;
+            } else {
+                items[arr[i]] ++;
+            }
+
+            if (items[arr[i]]>counter) {
+                output = arr[i]
+                counter = items[arr[i]]
+            }
+        }
+
+        return output
+    }, //highestFreqItem
+
+    shortestPath:function(arr){
+        //find the shortest arr
+        let initArray = Array($dimension);
+        let tempArray = [];
+        let outputArray = [];
+        let minLength=0;
+        //create an array with length of '$dimension'
+        for (let i = 0; i < arr.length; i++) {
+           const currentArr = arr[i];
+           if (currentArr.length !== 0) {
+            tempArray = currentArr.length < initArray.length ? currentArr : tempArray;
+            initArray = tempArray;
+           }
+        }
+
+        minLength = tempArray.length;
+
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i].length === minLength) {
+                outputArray.push(arr[i])
+            }
+            
+        }
+
+        // console.log(outputArray);
+        return outputArray
+    }, // shortestPath
+
+    predictNextStep:function (player,occupied) {
+        const answers = this.genAnswer();
+        let nextStep = [];
+        for (let i = 0; i < answers.length; i++) {
+            const currentAnswer = answers[i]
+            for (let j = 0; j < records[player].length; j++) {
+                if (currentAnswer.includes( records[player][j] )) {
+                    nextStep.push(currentAnswer.filter(ele=>!occupied.includes(ele)))
+                }
+            }
+        } 
+
+        return nextStep;
+    }, // predictNextStep
+
+
 
 }
 
 tools.init();
 $('#reset-btn').on('click', tools.reset)
 // $('.cell').on('click', handler)
+
+// const test = [[1,2],[1,2,3,4],[1,2,3],[0,1],[1],[3]]
+const test2 =[[1,2],[5],[6],[1,7],[8],[8],[2,6]] 
+const test3 = [[],[],[7,8],[3],[3],[7],[8]]
+// debugger
+tools.shortestPath(test3)
 
