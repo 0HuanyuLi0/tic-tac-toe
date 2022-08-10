@@ -11,6 +11,7 @@ let isGameOver = false;
 let $dimension = null;
 let isComputer = true;
 
+
 const records = {
     x: [],
     o: [],
@@ -21,7 +22,7 @@ const tools = {
 
     init: function () {
         //1. get the dimension value and draw table
-        $dimension = parseInt( $('#dimension').val());
+        $dimension = parseInt($('#dimension').val());
         $('#game-container').html('');
         tools.genTable();
 
@@ -187,6 +188,7 @@ const tools = {
     }, //checkResult
 
     isInAnswer: function (answerArray, array) {
+        // array.length > answerArray.length
         // check if the array includes answer
         // [1,3,4,7] includes [1,4,7]
         // only all included -> true
@@ -236,74 +238,72 @@ const tools = {
 
     opponent: function () {
         const tableLength = $dimension * $dimension;
-        const centerPosition = Math.floor( tableLength / 2);
+        const centerPosition = Math.floor(tableLength / 2);
         const all = [];
         for (let i = 0; i < tableLength; i++) {
             all.push(i)
         }// all : 0-8
         const occupied = records.x.concat(records.o);
-        const unoccupied = all.filter(ele=>!occupied.includes(ele))
-        const randomChoice = unoccupied[ Math.floor(Math.random()*unoccupied.length)]
+
+        const unoccupied = this.subArr(all, occupied);
+
+        const randomChoice = this.randomChoice(unoccupied);
 
         if (unoccupied.includes(centerPosition)) {
             return `cell-${centerPosition}`
         } // take the center cell to maximum win chance
 
 
+        //====================== defencse ===============================
+        let defenseStep = this.predictNextStep('x')
+        defenseStep = this.arrRemover(defenseStep, records.o)
+        defenseStep = this.arrDelArr(defenseStep, records.x)
+        defenseStep = this.shortestPath(defenseStep)
+        if (defenseStep.flat(Infinity).length === 1) {
+            return `cell-${defenseStep}`
+        }
         
-        //======== against player X to win ============
-        // const answers = this.genAnswer();
-        // let predictiveX = [];
-        // for (let i = 0; i < answers.length; i++) {
-        //     const currentAnswer = answers[i]
-        //     for (let j = 0; j < records.x.length; j++) {
-        //         if (currentAnswer.includes( records.x[j] )) {
-        //             predictiveX.push(currentAnswer.filter(ele=>!occupied.includes(ele)))
-        //         }
-        //     }
-        // } // get the X next posible step
-        const nextStepforX = this.predictNextStep('x',occupied)
-        const shortPathforX = this.shortestPath(nextStepforX)
-        const choiceforX = this.highestFreqItem(shortPathforX.flat())
+        //=========================== attack ================================
+        // console.log(records.o);
+        if (records.o.length === 0) {
+            return `cell-${defenseStep}`
+        }
+        let attackStep = this.predictNextStep('o')
+        attackStep = this.arrRemover(attackStep, records.x)
+        attackStep = this.arrDelArr(attackStep, records.o)
+        attackStep = this.shortestPath(attackStep)
+        if (attackStep.flat(Infinity).length === 1) {
+            return `cell-${attackStep}`
+        }
 
-        const nextStepforO = this.predictNextStep('o',occupied)
-        const shortPathforO = this.shortestPath(nextStepforO)
-        const choiceforO = this.highestFreqItem(shortPathforO.flat())
+        let sumArr = defenseStep.concat(attackStep)
+        optItem = this.highestFreqItem(sumArr.flat(Infinity))
+        if (optItem === null) {
+            this.showMessage('tie')
+            // return `cell-${randomChoice}`
+        }
+        
+        console.log('A: ',attackStep);
+        console.log('D: ', defenseStep);
+        console.log('OP: ', optItem);
+        return `cell-${optItem}`
 
-        console.log('====x======');
-        console.log(nextStepforX);
-        console.log(shortPathforX);
-        console.log(choiceforX);
-        console.log('====o======');
-        console.log(nextStepforO);
-        console.log(shortPathforO);
-        console.log(choiceforO);
-        //======== against player X to win ============
 
-        //======== push player O to win ============
-        choice = randomChoice
-       
-        if(shortPathforX[0].length === 1 || shortPathforO[0] === undefined){
-            choice = choiceforX
-        } else if (shortPathforO[0].length === 1) {
-            choice = choiceforO
-        } 
-        return `cell-${choice}`
     }, // opponent
 
-    highestFreqItem:function (arr) {
+    highestFreqItem: function (arr) {
         // find the item that has the highest frequecy in arr Array
-        const items={};
-        let counter=0;
-        let output=null;
+        const items = {};
+        let counter = 0;
+        let output = null;
         for (let i = 0; i < arr.length; i++) {
             if (items[arr[i]] === undefined) {
                 items[arr[i]] = 1;
             } else {
-                items[arr[i]] ++;
+                items[arr[i]]++;
             }
 
-            if (items[arr[i]]>counter) {
+            if (items[arr[i]] > counter) {
                 output = arr[i]
                 counter = items[arr[i]]
             }
@@ -312,60 +312,116 @@ const tools = {
         return output
     }, //highestFreqItem
 
-    shortestPath:function(arr){
+    shortestPath: function (arr) {
         //find the shortest arr
         let initArray = Array($dimension);
         let tempArray = [];
         let outputArray = [];
-        let minLength=0;
+        let minLength = 0;
         //create an array with length of '$dimension'
         for (let i = 0; i < arr.length; i++) {
-           const currentArr = arr[i];
-           if (currentArr.length !== 0) {
-            tempArray = currentArr.length < initArray.length ? currentArr : tempArray;
-            initArray = tempArray;
-           }
+            const currentArr = arr[i];
+            if (currentArr.length !== 0) {
+                tempArray = currentArr.length <= initArray.length ? currentArr : tempArray;
+                initArray = tempArray;
+            }
         }
-
         minLength = tempArray.length;
+        // console.log(minLength);
 
         for (let i = 0; i < arr.length; i++) {
             if (arr[i].length === minLength) {
                 outputArray.push(arr[i])
             }
-            
+
         }
 
         // console.log(outputArray);
         return outputArray
     }, // shortestPath
 
-    predictNextStep:function (player,occupied) {
+    predictNextStep: function (player) {
         const answers = this.genAnswer();
-        let nextStep = [];
-        for (let i = 0; i < answers.length; i++) {
-            const currentAnswer = answers[i]
-            for (let j = 0; j < records[player].length; j++) {
-                if (currentAnswer.includes( records[player][j] )) {
-                    nextStep.push(currentAnswer.filter(ele=>!occupied.includes(ele)))
-                }
-            }
-        } 
-
+        const playerOccupied = records[player];
+        let nextStep = this.arrFilter(answers, playerOccupied)
         return nextStep;
     }, // predictNextStep
 
+    arrRemover: function (arrX, arrY) {
+
+        //return an array that it does not contain the element that in arrY
+        let outputArr = arrX; //iterate to remove the element from new array
+        let tempArr = []
+        for (let i = 0; i < arrY.length; i++) {
+
+            for (let j = 0; j < outputArr.length; j++) {
+                if (!outputArr[j].includes(arrY[i]) && !tempArr.includes(outputArr[j])) {
+                    tempArr.push(outputArr[j])
+                }
+            }
+
+            outputArr = tempArr
+            tempArr = []
+        }
+        // console.log(outputArr);
+        return outputArr
+    }, // arrRemover
+
+    arrFilter: function (arrX, arrY) {
+        // return an array which contains the element that in arrY
+        let temp = [];
+        for (let i = 0; i < arrX.length; i++) {
+            for (let j = 0; j < arrY.length; j++) {
+                if (arrX[i].includes(arrY[j]) && (!temp.includes(arrX[i]))) {
+                    temp.push(arrX[i])
+                }
+            }
+        }
+        // console.log(temp);
+        return temp
+    }, //arrFilter
+
+    arrDelEle: function (arr, ele) {
+        const output = []
+        for (let i = 0; i < arr.length; i++) {
+            if (arr[i] !== ele) {
+                output.push(arr[i])
+            }
+        }
+        return output
+    }, //arrDelEle
+
+    arrDelArr: function (arrX, arrY) {
+        // return array that arrX-arrY
+        //X:[[0,1,2],[0,3,6]] | Y:[0,3] | OT: [[1,2],[6]]
+        let temp = []
+        for (let i = 0; i < arrX.length; i++) {
+            temp.push(this.subArr(arrX[i], arrY))
+        }
+        // console.log(temp);
+        return temp
+
+    }, //arrDelArr
+
+    subArr: function (all, part) {
+        // return complementary array
+        let sup = all;
+
+        for (let i = 0; i < part.length; i++) {
+            sup = this.arrDelEle(sup, part[i])
+        }
+
+        // console.log('SUP: ',sup);
+        return sup
+    }, // subArr
+
+    randomChoice:function (arr) {
+        return arr[Math.floor(Math.random() * arr.length)]
+    }, //randomChoice
 
 
 }
 
 tools.init();
 $('#reset-btn').on('click', tools.reset)
-// $('.cell').on('click', handler)
-
-// const test = [[1,2],[1,2,3,4],[1,2,3],[0,1],[1],[3]]
-const test2 =[[1,2],[5],[6],[1,7],[8],[8],[2,6]] 
-const test3 = [[],[],[7,8],[3],[3],[7],[8]]
-// debugger
-tools.shortestPath(test3)
 
