@@ -20,9 +20,13 @@ const records = {
 } // record the steps
 // store the players click position
 
+
 const tools = {
 
     run: function () {
+
+        
+
         //1. get the dimension value and draw table
         $dimension = parseInt($('#dimension').val());
         $('#game-container').html('');
@@ -232,11 +236,25 @@ const tools = {
         score[rlt] += 1
         localStorage[rlt] = score[rlt]
         $(`#score-${rlt}`).text(localStorage[rlt])
+
+        const playerXName = $('#playerX').val()
+        const playerOName = $('#playerO').val()
         // update score
 
-        const text = rlt === 'tie' ? 'TIE' : `Player ${rlt.toUpperCase()} Win!`;
+        // const text = rlt === 'tie' ? 'TIE' : `Player ${rlt.toUpperCase()} Win!`;
+        let text = null;
+        if (rlt === 'tie') {
+            text = 'TIE'
+        } else if(rlt === 'x'){
+            text = `${playerXName} WIN!`
+        } else{
+            text = `${playerOName} WIN!`
+        }
+
         let fontColor = `${rlt === 'x' ? 'red' : rlt === 'o' ? 'green' : 'yellow'}`;
         // TIE: yellow; X win: Red; O win: Green
+
+
 
         $('<div>').text(text).css({
             fontSize: this.cellFontSize(),

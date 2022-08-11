@@ -20,7 +20,7 @@ h1 {
 }
 
 header,
-.btns, main label {
+.btns, main label{
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
@@ -36,6 +36,14 @@ header,
     text-align: center;
     font-size: clamp(20px, 5vw, 50px)
 }
+
+.score input{
+    width: 100%;
+    font-size: clamp(20px, 5vw, 50px);
+    text-align: center;
+}
+
+
 
 
 .btn {
