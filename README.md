@@ -1,11 +1,12 @@
 
-# TIC TAC TOE - Game Project
+# TIC TAC TOE
 
-This is a Tic-Tac-Toe game coded with **HTML, CSS, Javascript,** and **jQuery**.
-[https://0huanyuli0.github.io/tic-tac-toe/](https://0huanyuli0.github.io/tic-tac-toe/)
+This is a Tic-Tac-Toe game coded with **HTML, CSS, Javascript,** and **jQuery**.   
+
+Please visit [https://0huanyuli0.github.io/tic-tac-toe/](https://0huanyuli0.github.io/tic-tac-toe/) to play this game. 🤜🤛
 
 <figure class="half">
-  <img src="/image/light%20version.png" width=50%><img src="/image/night%20version.png" width=50%>
+  <img src="/image/light%20version.png" width=40%><img src="/image/night%20version.png" width=40%>
 </figure>
 
 The game has the following features:
@@ -111,7 +112,7 @@ The 'AI' opponent use the following logic to decide the next move:
 
 ---
 
-## Know Bugs
+## Known Bugs
 - In 'AI' opponent mode, 3*3 size board, if player placed 1 corner, then the opposite corner, then another corner, then there is a chance to win.
 
   - Developer observed the `console` output, and all calculation results are correct according to the existing logic. The bug occurs at the second step. The optimal step for AI should be at the middle line, but AI placed mark on a corner. The reason is if AI placed mark at the corner has 2 chances to defencse and 1 chance to attack, which the maxium chances over all(3 chances). However, if AI placed mark at the middle line, it has 1 defencse chance and 1 attack chance (2 chances in total). Therefore, according to the logic above, AI placed mark at the position that it should be.
