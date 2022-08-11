@@ -1,17 +1,30 @@
 
 // https://gist.github.com/textchimp/afcb3ddc676dccd59ccb18cb9391c87a
 
+// const score = {
+//     x: parseInt(localStorage.getItem('x')),
+//     o: parseInt(localStorage.getItem('o')),
+//     tie: parseInt(localStorage.getItem('tie')),
+// }
+
 const score = {
-    x: parseInt(localStorage.getItem('x')),
-    o: parseInt(localStorage.getItem('o')),
-    tie: parseInt(localStorage.getItem('tie')),
+    x: parseInt(localStorage.getItem('x') || 0),
+    o: parseInt(localStorage.getItem('o') || 0),
+    tie: parseInt(localStorage.getItem('tie') || 0),
+    $dimension: parseInt(localStorage.getItem('$dimension') || 3),
+    isNight: JSON.parse(localStorage.getItem('isNight') || false),
+    isComputer: JSON.parse(localStorage.getItem('isComputer') || false),
+}
+for (const key in score) {
+    localStorage.setItem(key,score[key])
 }
 
 let isPlayerX = true;
 let isGameOver = false;
-let $dimension = null;
-let isComputer = false;
-let isNight = false;
+let $dimension = score.$dimension;
+$('#dimension').val($dimension);
+let isComputer = score.isComputer;
+let isNight = score.isNight;
 let isProcessing = false;
 
 const records = {
@@ -22,13 +35,15 @@ const records = {
 
 
 const tools = {
-
+    
     run: function () {
-
-        
         isPlayerX = true;
         //1. get the dimension value and draw table
+       if (parseInt($('#dimension').val()) !== $dimension) {
         $dimension = parseInt($('#dimension').val());
+    }
+        localStorage.$dimension = $dimension;
+    
         $('#game-container').html('');
         tools.genTable();
         tools.genAnswer()
@@ -61,12 +76,12 @@ const tools = {
         })
 
         //4. show the score
-        for (const key in score) {
-            if (isNaN(score[key])) {
-                score[key] = 0;
-            }
-            $(`#score-${key}`).text(score[key])
-        }
+      
+        $(`#score-x`).text(localStorage.getItem('x'))
+        $(`#score-tie`).text(localStorage.getItem('tie'))
+        $(`#score-o`).text(localStorage.getItem('o'))
+
+        
 
     }, //run
 
@@ -74,11 +89,17 @@ const tools = {
         tools.run();
         //reset the scores to 0
         $('.player-score').text('0')
-        for (const key in score) {
-            score[key] = 0;
-            localStorage.setItem(key, score[key])
-            // set the local storage
-        }
+        score.x = 0;
+        score.tie = 0
+        score.o =0
+        localStorage.x = 0
+        localStorage.tie = 0
+        localStorage.o = 0
+        // for (const key in score) {
+        //     score[key] = 0;
+        //     localStorage.setItem(key, score[key])
+        //     // set the local storage
+        // }
 
     }, //rest
 
@@ -303,6 +324,9 @@ const tools = {
         if (defenseStep.flat(Infinity).length === 1) {
             return `cell-${defenseStep}`
         }
+        if (defenseStep.flat(Infinity).length > 1) {
+            defenseStep = attackStep
+        } // to temporary fix the known bug
 
         let sumArr = defenseStep.flat(Infinity).concat(attackStep.flat(Infinity))
 
@@ -463,6 +487,7 @@ const tools = {
         }
 
         tools.lightUpBtn(this, isComputer)
+        localStorage.isComputer = isComputer
     }, //startAI
 
     lightUpBtn: function (target, condition) {
@@ -515,4 +540,5 @@ $(window).on('resize', tools.refreshFont) // dynamic change the font size
 $('#night-btn').on('click', function () {
     isNight = !isNight
     tools.changeColor();
+    localStorage.isNight = isNight
 })
