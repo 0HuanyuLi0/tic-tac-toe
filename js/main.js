@@ -471,7 +471,7 @@ const tools = {
         const $btn = $(target)
         if (condition) {
             $btn.css({
-                backgroundImage: 'url(../image/bg_nav_rollover.png)',
+                backgroundImage: 'url(https://0huanyuli0.github.io/tic-tac-toe/image/bg_nav_rollover.png)',
                 backgroundRepeat: 'repeat-x',
             })
         } else {
