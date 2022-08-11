@@ -1,5 +1,6 @@
 
 // https://gist.github.com/textchimp/afcb3ddc676dccd59ccb18cb9391c87a
+
 const score = {
     x: parseInt(localStorage.getItem('x')),
     o: parseInt(localStorage.getItem('o')),
@@ -9,8 +10,9 @@ const score = {
 let isPlayerX = true;
 let isGameOver = false;
 let $dimension = null;
-let isComputer = true;
-
+let isComputer = false;
+let isNight = false;
+let isProcessing = false;
 
 const records = {
     x: [],
@@ -20,47 +22,49 @@ const records = {
 
 const tools = {
 
-    init: function () {
+    run: function () {
         //1. get the dimension value and draw table
         $dimension = parseInt($('#dimension').val());
         $('#game-container').html('');
         tools.genTable();
 
+        tools.changeColor();
+
         //2. add the event handler to the generated table
         // 'this': point to the clicked <div>
         // this.id: cell-4
-
+            
         $('.cell').on('click', function () {
             // console.log(this);
-            if (isGameOver) {
+            if (isGameOver || isProcessing) {
                 return;
             } // prevent extra click
-            // tools.putSymbol(tools.opponent());
+
             tools.putSymbol(this.id);
-            if (!isPlayerX && isComputer) {
-                tools.putSymbol(tools.opponent());
+            
+            if (!isPlayerX && isComputer && !isGameOver) {
+                isProcessing = true
+                setTimeout(function () {
+                    tools.putSymbol(tools.opponent())
+                    isProcessing = false
+                }, 500)
+                // tools.putSymbol(tools.opponent());
             }
-            tools.checkResult();
+            // tools.checkResult();
         })
-
-
-
-        //3. change the button from 'start' to 'reset'
-        $('#reset-btn').text('Reset')
 
         //4. show the score
         for (const key in score) {
-            // console.log(score[key]);
             if (isNaN(score[key])) {
                 score[key] = 0;
             }
             $(`#score-${key}`).text(score[key])
         }
 
-    }, //init
+    }, //run
 
     reset: function () {
-        tools.init();
+        tools.run();
         //reset the scores to 0
         $('.player-score').text('0')
         for (const key in score) {
@@ -88,6 +92,19 @@ const tools = {
                 $('<div>').addClass('cell').attr('id', `cell-${i + j * $dimension}`).text(' ').appendTo($rowDiv);
             } // generate column <div>s
         }
+
+        if (!isNight) {
+            $('.cell').css({
+                backgroundColor: '#E7EFC5',
+                border: '1px solid black'
+            })
+        } else {
+            $('.cell').css({
+                backgroundColor: '#2b2d42',
+                border: '1px solid white'
+            })
+        }
+
     }, // genTable
 
     genAnswer: function () {
@@ -99,7 +116,6 @@ const tools = {
         for (let i = 0; i < len; i++) {
             all.push(i)
         }// all : 0-8
-        // console.log(all);
 
         for (let i = 0; i < $dimension; i++) {
             tempArray = [];
@@ -140,9 +156,16 @@ const tools = {
         return `${$size}px`
     }, // set font size to the 80% of the <div> width
 
+    refreshFont: function () {
+        $('.cell').css({
+            fontSize: tools.cellFontSize(),
+        })
+    }, //refreshFont
+
     putSymbol: function (position) {
         // put the symbol ('X' or 'O') on the table
         // position: cell-4
+     
         const $target = $(`#${position}`);
 
         if ($target.text() !== ' ') {
@@ -165,6 +188,8 @@ const tools = {
             records.o.push(parseInt(position.slice(5)))
             isPlayerX = !isPlayerX
         }
+        tools.checkResult();
+       
         // this.checkResult();
     }, //putSymbol
 
@@ -238,24 +263,15 @@ const tools = {
 
     opponent: function () {
         const tableLength = $dimension * $dimension;
-        const centerPosition = Math.floor(tableLength / 2);
         const all = [];
         for (let i = 0; i < tableLength; i++) {
             all.push(i)
         }// all : 0-8
-        const occupied = records.x.concat(records.o);
-
-        const unoccupied = this.subArr(all, occupied);
-
-        const randomChoice = this.randomChoice(unoccupied);
-
-        if (unoccupied.includes(centerPosition)) {
-            // return `cell-${centerPosition}`
-        } // take the center cell to maximum win chance
+        // const occupied = records.x.concat(records.o);
+        // const unoccupied = this.subArr(all, occupied);
 
         //=========================== attack ================================
         let attackStep = this.predictNextStep('o')
-        // console.log(attackStep);
         attackStep = this.arrRemover(attackStep, records.x)
         attackStep = this.arrDelArr(attackStep, records.o)
         attackStep = this.shortestPath(attackStep)
@@ -265,34 +281,29 @@ const tools = {
 
         //====================== defencse ===============================
         let defenseStep = this.predictNextStep('x')
-        console.log('posbs: ',defenseStep);
         defenseStep = this.arrRemover(defenseStep, records.o)
-        console.log('arrRemover: ',defenseStep,records.o);
         defenseStep = this.arrDelArr(defenseStep, records.x)
-        console.log('arrDeler: ',defenseStep,records.x);
         defenseStep = this.shortestPath(defenseStep)
-        console.log('Short: ',defenseStep);
         if (defenseStep.flat(Infinity).length === 1) {
             return `cell-${defenseStep}`
         }
-        // console.log(defenseStep);
 
         let sumArr = defenseStep.flat(Infinity).concat(attackStep.flat(Infinity))
-        console.log('SUM: ',sumArr);
+
         optItem = this.highestFreqItem(sumArr.flat(Infinity))
-        console.log('OP: ', optItem);
-        if (optItem === null || optItem.length===0) {
+
+        console.log('OPT-A: ', optItem);
+        if (optItem === null || optItem.length === 0) {
             this.showMessage('tie')
             // return `cell-${randomChoice}`
         } else if (optItem.length > 1) {
             optItem = this.randomChoice(optItem)
         }
 
-        console.log('A: ', attackStep);
-        console.log('D: ', defenseStep);
-        console.log('OPF: ', optItem);
+        console.log('Attack: ', attackStep);
+        console.log('Defense: ', defenseStep);
+        console.log('OPT-F: ', optItem);
         return `cell-${optItem}`
-
 
     }, // opponent
 
@@ -318,8 +329,7 @@ const tools = {
                 output.push(key)
             }
         }
-
-        console.log(output);
+        // console.log(output);
         return output
     }, //highestFreqItem
 
@@ -355,22 +365,20 @@ const tools = {
         const answers = this.genAnswer();
         const playerOccupied = records[player];
         let nextStep = this.arrFilter(answers, playerOccupied)
+        // return an array which contains the element that in arrY
         return nextStep;
     }, // predictNextStep
 
     arrRemover: function (arrX, arrY) {
-
         //return an array that it does not contain the element that in arrY
         let outputArr = arrX; //iterate to remove the element from new array
         let tempArr = []
         for (let i = 0; i < arrY.length; i++) {
-
             for (let j = 0; j < outputArr.length; j++) {
                 if (!outputArr[j].includes(arrY[i]) && !tempArr.includes(outputArr[j])) {
                     tempArr.push(outputArr[j])
                 }
             }
-
             outputArr = tempArr
             tempArr = []
         }
@@ -425,7 +433,6 @@ const tools = {
             sup = this.arrDelEle(sup, part[i])
         }
 
-        // console.log('SUP: ',sup);
         return sup
     }, // subArr
 
@@ -433,9 +440,63 @@ const tools = {
         return arr[Math.floor(Math.random() * arr.length)]
     }, //randomChoice
 
+    startAI: function () {
+        isComputer = !isComputer
+        if (!isPlayerX && isComputer) {
+            tools.putSymbol(tools.opponent());
+        }
 
+        tools.lightUpBtn(this, isComputer)
+    }, //startAI
+
+    lightUpBtn: function (target, condition) {
+        const $btn = $(target)
+        if (condition) {
+            $btn.css({
+                backgroundImage: 'url(../image/bg_nav_rollover.png)',
+                backgroundRepeat: 'repeat-x',
+            })
+        } else {
+            $btn.css({
+                backgroundImage: 'none',
+            })
+        }
+    }, //lightUpBtn
+
+    changeColor: function () {
+
+        if (!isNight) {
+            $('#night-btn').text('Light')
+            $('*').css({
+                backgroundColor: '#333C83',
+            })
+            $('.cell').css({
+                // border:'1px solid black',
+                backgroundColor: '#333C83',
+            })
+
+        } else {
+            $('#night-btn').text('Night')
+            $('*').css({
+                backgroundColor: '#2b2d42',
+            })
+            $('.cell').css({
+                // border:'1px solid white',
+                backgroundColor: '#2b2d42',
+            })
+
+        }
+
+        tools.lightUpBtn('#AI-btn', isComputer)
+    }
 }
 
-tools.init();
+tools.run();
+$('#start-btn').on('click', tools.run)
 $('#reset-btn').on('click', tools.reset)
-
+$('#AI-btn').on('click', tools.startAI)
+$(window).on('resize', tools.refreshFont) // dynamic change the font size
+$('#night-btn').on('click', function () {
+    isNight = !isNight
+    tools.changeColor();
+})

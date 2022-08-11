@@ -2,65 +2,84 @@
 
 * {
     box-sizing: border-box;
-    background-color: black;
+    background-color: #2b2d42;
     color: white;
     font-family: 'Mouse Memoirs', sans-serif;
     margin: 0;
     padding: 0;
+    /* border: 1px solid red; */
+    
 }
 
 h1 {
     position: relative;
-    top: 50px;
+    top: 10px;
     text-align: center;
-    margin-bottom: 60px;
-    font-size: clamp(50px, 10vw, 80px)
+    margin-bottom: 30px;
+    font-size: clamp(30px, 10vw, 80px) 
 }
 
-header, .btns{
+header,
+.btns, main label {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
     max-width: 800px;
-    margin: 0 auto 20px;
-    /* justify-content: center; */
+    margin: 0 auto 10px;
     align-items: center;
-    /* position: relative; */
-    /* border: 1px solid red; */
+    /* word-wrap: break-word; */
 }
 
 
 .score {
     width: 20%;
     text-align: center;
-    font-size: clamp(15px, 8vw, 50px)
+    font-size: clamp(20px, 5vw, 50px)
 }
 
 
-#reset-btn{
-    width: clamp(80px, 25vw, 140px);
+.btn {
+    width: 20%;
     aspect-ratio: 21/9;
-    font-size: clamp(15px, 8vw, 50px);
-}
-
-.btns label{
-    font-size: clamp(15px, 8vw, 40px);
-}
-
-.btns input{
-    width: 5vw;
-    font-size: clamp(15px, 8vw, 40px);
+    font-size: clamp(15px, 5vw, 50px);
     text-align: center;
 }
 
+.btn input {
+    width: 100%;
+    font-size: clamp(15px, 5vw, 50px);
+    text-align: center;
+    display: block;
+    /* height: 50%;  */
+}
 
+#AI-btn{
+    background-image: url(../image/bg_nav_rollover.png);
+    background-repeat: repeat-x;
+}
+
+.btn:hover,#night-btn {
+    background-image: url(../image/bg_nav_rollover.png) !important; 
+    background-repeat: repeat-x !important;
+}
+
+main label, main input{
+    font-size: clamp(15px, 5vw, 30px);
+    text-align: center;
+}
+
+main input{
+    width: 10%;
+    min-width:30px ;
+}
 
 #game-container {
     width: 80vw;
     aspect-ratio: 1/1;
     max-width: 500px;
-    margin: 20px auto;
+    margin: 0px auto;
     position: relative;
+    
     /* border: 1px solid red; */
 }
 
@@ -75,7 +94,7 @@ header, .btns{
     width: 100%;
     /* not sure here */
     aspect-ratio: 1/1;
-    border: 1px solid white;
+    border: 1px solid white !important;
     display: flex;
     justify-content: center;
     align-items: center;
