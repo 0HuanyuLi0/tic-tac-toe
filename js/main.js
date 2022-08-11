@@ -26,13 +26,16 @@ const tools = {
     run: function () {
 
         
-
+        isPlayerX = true;
         //1. get the dimension value and draw table
         $dimension = parseInt($('#dimension').val());
         $('#game-container').html('');
         tools.genTable();
-
+        tools.genAnswer()
         tools.changeColor();
+        //reset steps recorder
+        records.x = [];
+        records.o = [];
 
         //2. add the event handler to the generated table
         // 'this': point to the clicked <div>
@@ -77,11 +80,6 @@ const tools = {
             // set the local storage
         }
 
-        //reset steps recorder
-        records.x = [];
-        records.o = [];
-
-        isPlayerX = true;
     }, //rest
 
     genTable: function () {
@@ -149,7 +147,7 @@ const tools = {
             tempArray.push(all[($dimension - 1) * (i + 1)])
         }
         answerArray.push(tempArray)
-        // for negtive diagonal
+        // for negative diagonal
 
         return answerArray;
 
