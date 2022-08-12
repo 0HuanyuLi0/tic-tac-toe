@@ -355,9 +355,10 @@ const tools = {
         if (defenseStep.flat(Infinity).length === 1) {
             return `cell-${defenseStep}`
         }
-        if (defenseStep.flat(Infinity).length > 1) {
+
+        if (defenseStep.flat(Infinity).length > 1 && records.o.length!==0) {
             defenseStep = attackStep
-        } // to temporary fix the known bug
+        } // to temporary fix the known bug and ensure first step at the center
 
         let sumArr = defenseStep.flat(Infinity).concat(attackStep.flat(Infinity))
 
