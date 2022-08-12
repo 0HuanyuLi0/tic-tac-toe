@@ -107,6 +107,7 @@ main input{
     justify-content: center;
     align-items: center;
     font-size: clamp(30px, 20vw, 120px);
+    cursor:pointer;
     /* font-size: 100%; */
 }
 

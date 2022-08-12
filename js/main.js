@@ -1,13 +1,7 @@
 
 // https://gist.github.com/textchimp/afcb3ddc676dccd59ccb18cb9391c87a
 
-// const score = {
-//     x: parseInt(localStorage.getItem('x')),
-//     o: parseInt(localStorage.getItem('o')),
-//     tie: parseInt(localStorage.getItem('tie')),
-// }
-
-const score = {
+const storage = {
     x: parseInt(localStorage.getItem('x') || 0),
     o: parseInt(localStorage.getItem('o') || 0),
     tie: parseInt(localStorage.getItem('tie') || 0),
@@ -16,22 +10,24 @@ const score = {
     isComputer: JSON.parse(localStorage.getItem('isComputer') || false),
     playerXName: localStorage.getItem('playerXName') || 'Player-X',
     playerOName: localStorage.getItem('playerOName') || 'Player-O',
-
 }
-for (const key in score) {
-    localStorage.setItem(key,score[key])
+
+for (const key in storage) {
+    localStorage.setItem(key,storage[key])
 }
 
 let isPlayerX = true;
 let isGameOver = false;
-let $dimension = score.$dimension;
-$('#dimension').val($dimension);
-let isComputer = score.isComputer;
-let isNight = score.isNight;
 let isProcessing = false;
-let playerXName = score.playerXName
+
+let $dimension = storage.$dimension;
+let isComputer = storage.isComputer;
+let isNight = storage.isNight;
+let playerXName = storage.playerXName;
+let playerOName = storage.playerOName;
+
+$('#dimension').val($dimension)
 $('#playerX').val(playerXName)
-let playerOName = score.playerOName
 $('#playerO').val(playerOName)
 
 
@@ -56,12 +52,15 @@ const tools = {
 
         localStorage.playerXName = playerXName
         localStorage.playerOName = playerOName
+        $('#playerX').val(playerXName)
+        $('#playerO').val(playerOName)
 
         //dimension
         if (parseInt($('#dimension').val()) !== $dimension) {
             $dimension = parseInt($('#dimension').val());
         }
             localStorage.$dimension = $dimension;
+            $('#dimension').val($dimension)
 
         //scores
         //show the score
@@ -74,8 +73,6 @@ const tools = {
        
         tools.init()
         //1. get the dimension value and draw table
-      
-    
         $('#game-container').html('');
         tools.genTable();
         tools.genAnswer()
@@ -101,33 +98,24 @@ const tools = {
                 setTimeout(function () {
                     tools.putSymbol(tools.opponent())
                     isProcessing = false
-                }, 500)
-                // tools.putSymbol(tools.opponent());
+                }, 700)
             }
             // tools.checkResult();
         })
-
-        
-
     }, //run
 
     reset: function () {
         
         //reset the scores to 0
         $('.player-score').text('0')
-        score.x = 0;
-        score.tie = 0
-        score.o =0
+        storage.x = 0;
+        storage.tie = 0
+        storage.o =0
         localStorage.x = 0
         localStorage.tie = 0
         localStorage.o = 0
 
         tools.run();
-        // for (const key in score) {
-        //     score[key] = 0;
-        //     localStorage.setItem(key, score[key])
-        //     // set the local storage
-        // }
 
     }, //rest
 
@@ -240,8 +228,6 @@ const tools = {
             isPlayerX = !isPlayerX
         }
         tools.checkResult();
-       
-        // this.checkResult();
     }, //putSymbol
 
     checkResult: function () {
@@ -280,14 +266,12 @@ const tools = {
         //rlt: 'x' | 'o' | 'tie'
         isGameOver = true;
         // turn off the game
-        score[rlt] += 1
-        localStorage[rlt] = score[rlt]
+
+        storage[rlt] += 1
+        localStorage[rlt] = storage[rlt]
         $(`#score-${rlt}`).text(localStorage[rlt])
-
-
         // update score
 
-        // const text = rlt === 'tie' ? 'TIE' : `Player ${rlt.toUpperCase()} Win!`;
         let text = null;
         if (rlt === 'tie') {
             text = 'TIE'
@@ -299,8 +283,6 @@ const tools = {
 
         let fontColor = `${rlt === 'x' ? 'red' : rlt === 'o' ? 'green' : 'yellow'}`;
         // TIE: yellow; X win: Red; O win: Green
-
-
 
         $('<div>').text(text).css({
             fontSize: this.cellFontSize(),
@@ -331,6 +313,7 @@ const tools = {
         for (let i = 0; i < tableLength; i++) {
             all.push(i)
         }// all : 0-8
+
         // const occupied = records.x.concat(records.o);
         // const unoccupied = this.subArr(all, occupied);
 
@@ -401,7 +384,8 @@ const tools = {
     }, //highestFreqItem
 
     shortestPath: function (arr) {
-        //find the shortest arr
+        //find the shortest arr in a 2D array
+        //[[1,2],[1,2,3],[4,5]] => [[1,2],[4,5]]
         let initArray = Array($dimension);
         let tempArray = [];
         let outputArray = [];
@@ -421,14 +405,15 @@ const tools = {
             if (arr[i].length === minLength) {
                 outputArray.push(arr[i])
             }
-
         }
-
         // console.log(outputArray);
         return outputArray
     }, // shortestPath
 
     predictNextStep: function (player) {
+        // return all potential attack positions
+        //player-x occupied position 0 => there are 3 ways to win
+        //[0,1,2], [0,3,6],[0,4,8]
         const answers = this.genAnswer();
         const playerOccupied = records[player];
         let nextStep = this.arrFilter(answers, playerOccupied)
@@ -438,6 +423,7 @@ const tools = {
 
     arrRemover: function (arrX, arrY) {
         //return an array that it does not contain the element that in arrY
+        // x:[[1,4,7],[0,2,5],[0,1,5]] y:[1,4] => [0,2,5]
         let outputArr = arrX; //iterate to remove the element from new array
         let tempArr = []
         for (let i = 0; i < arrY.length; i++) {
@@ -455,6 +441,7 @@ const tools = {
 
     arrFilter: function (arrX, arrY) {
         // return an array which contains the element that in arrY
+        //X:[[1,2,3],[2,5,8],[3,4,5],[0,1,7]] Y:[2,3] => [[1,2,3],[2,5,8],[3,4,5]]
         if (arrY.length === 0) {
             return arrX
         }
@@ -471,6 +458,7 @@ const tools = {
     }, //arrFilter
 
     arrDelEle: function (arr, ele) {
+        // delete the element from array
         const output = []
         for (let i = 0; i < arr.length; i++) {
             if (arr[i] !== ele) {
@@ -481,6 +469,7 @@ const tools = {
     }, //arrDelEle
 
     arrDelArr: function (arrX, arrY) {
+        // delete array's elements from another array's elements
         // return array that arrX-arrY
         //X:[[0,1,2],[0,3,6]] | Y:[0,3] | OT: [[1,2],[6]]
         let temp = []
@@ -494,12 +483,11 @@ const tools = {
 
     subArr: function (all, part) {
         // return complementary array
+        //all:[1,2,3,4], part:[1,3] => [2,4]
         let sup = all;
-
         for (let i = 0; i < part.length; i++) {
             sup = this.arrDelEle(sup, part[i])
         }
-
         return sup
     }, // subArr
 
