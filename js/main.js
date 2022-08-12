@@ -231,7 +231,25 @@ const tools = {
     }, //putSymbol
 
     checkResult: function () {
-        // check the answer
+
+        //=========prediction=============
+        let attackStep = this.predictNextStep('o')
+        attackStep = this.arrRemover(attackStep, records.x)
+        attackStep = this.arrDelArr(attackStep, records.o)
+        attackStep = this.shortestPath(attackStep)
+
+        let defenseStep = this.predictNextStep('x')
+        defenseStep = this.arrRemover(defenseStep, records.o)
+        defenseStep = this.arrDelArr(defenseStep, records.x)
+        defenseStep = this.shortestPath(defenseStep)
+
+        let sumArr = defenseStep.flat(Infinity).concat(attackStep.flat(Infinity))
+
+        if (sumArr.flat(Infinity).length === 0) {
+            this.showMessage('tie')
+        }
+
+        // =============check the answer=============
         for (let i = 0; i < this.genAnswer().length; i++) {
             const currentAnswer = this.genAnswer()[i];
             if (this.isInAnswer(currentAnswer, records.x)) {
@@ -246,6 +264,9 @@ const tools = {
         if ((records.x.length + records.o.length) === $dimension * $dimension) {
             this.showMessage('tie')
         } // if table is full -> draw
+
+        //=======================================
+
 
     }, //checkResult
 

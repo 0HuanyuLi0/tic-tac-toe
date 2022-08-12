@@ -43,6 +43,13 @@ header,
     text-align: center;
 }
 
+#playerX{
+    color: red !important;
+}
+#playerO{
+    color: green !important;
+}
+
 
 
 
