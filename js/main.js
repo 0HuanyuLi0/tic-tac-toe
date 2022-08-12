@@ -14,6 +14,9 @@ const score = {
     $dimension: parseInt(localStorage.getItem('$dimension') || 3),
     isNight: JSON.parse(localStorage.getItem('isNight') || false),
     isComputer: JSON.parse(localStorage.getItem('isComputer') || false),
+    playerXName: localStorage.getItem('playerXName') || 'Player-X',
+    playerOName: localStorage.getItem('playerOName') || 'Player-O',
+
 }
 for (const key in score) {
     localStorage.setItem(key,score[key])
@@ -26,6 +29,11 @@ $('#dimension').val($dimension);
 let isComputer = score.isComputer;
 let isNight = score.isNight;
 let isProcessing = false;
+let playerXName = score.playerXName
+$('#playerX').val(playerXName)
+let playerOName = score.playerOName
+$('#playerO').val(playerOName)
+
 
 const records = {
     x: [],
@@ -35,14 +43,38 @@ const records = {
 
 
 const tools = {
+
+    init:function () {
+        isPlayerX = true;
+        //player name
+        if ($('#playerX').val() !== playerXName) {
+            playerXName = $('#playerX').val()
+        }
+        if ($('#playerO').val() !== playerOName) {
+            playerOName = $('#playerO').val()
+        }
+
+        localStorage.playerXName = playerXName
+        localStorage.playerOName = playerOName
+
+        //dimension
+        if (parseInt($('#dimension').val()) !== $dimension) {
+            $dimension = parseInt($('#dimension').val());
+        }
+            localStorage.$dimension = $dimension;
+
+        //scores
+        //show the score
+        $(`#score-x`).text(localStorage.getItem('x'))
+        $(`#score-tie`).text(localStorage.getItem('tie'))
+        $(`#score-o`).text(localStorage.getItem('o'))
+    },
     
     run: function () {
-        isPlayerX = true;
+       
+        tools.init()
         //1. get the dimension value and draw table
-       if (parseInt($('#dimension').val()) !== $dimension) {
-        $dimension = parseInt($('#dimension').val());
-    }
-        localStorage.$dimension = $dimension;
+      
     
         $('#game-container').html('');
         tools.genTable();
@@ -75,18 +107,12 @@ const tools = {
             // tools.checkResult();
         })
 
-        //4. show the score
-      
-        $(`#score-x`).text(localStorage.getItem('x'))
-        $(`#score-tie`).text(localStorage.getItem('tie'))
-        $(`#score-o`).text(localStorage.getItem('o'))
-
         
 
     }, //run
 
     reset: function () {
-        tools.run();
+        
         //reset the scores to 0
         $('.player-score').text('0')
         score.x = 0;
@@ -95,6 +121,8 @@ const tools = {
         localStorage.x = 0
         localStorage.tie = 0
         localStorage.o = 0
+
+        tools.run();
         // for (const key in score) {
         //     score[key] = 0;
         //     localStorage.setItem(key, score[key])
@@ -256,8 +284,7 @@ const tools = {
         localStorage[rlt] = score[rlt]
         $(`#score-${rlt}`).text(localStorage[rlt])
 
-        const playerXName = $('#playerX').val()
-        const playerOName = $('#playerO').val()
+
         // update score
 
         // const text = rlt === 'tie' ? 'TIE' : `Player ${rlt.toUpperCase()} Win!`;

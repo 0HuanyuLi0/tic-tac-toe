@@ -14,7 +14,7 @@ The game has the following features:
 - Responsive layout
 - Customized board size
 - Changeable players name
-- Remember scores and settings by using `LocalStorage`
+- Remember scores, names, and settings by using `LocalStorage`
 - Day or Night modes
 - Turn on/off AI opponent
 
@@ -27,7 +27,7 @@ This game is for two players, Player-X and Player-O. The player who succeeds in 
 
 The default layout is 3 * 3 board with 'Day' mode. AI opponent off. Default player names are 'Player-X' and 'Player-O'. The first player is 'Player-X'.
 
-- **Start Game**: Player can directly play the game as the page loaded. If player wants to start a new game or change the board dimensions and keep the scores, player can click `Start` button.
+- **Start Game**: If player use the default name, player can directly play the game as the page loaded. If player wants to start a new game, or change the name, or change the board dimensions and keep the scores, please click `Start` button.
 
 - **Clean Scores**: Click `Reset` button to set scores to 0. If you would like to change the board dimension and clean the scores at the same time, please click `Reset` button.
 
